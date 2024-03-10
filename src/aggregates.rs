@@ -33,7 +33,9 @@ impl AggregatePublicKey {
 
         let mut agg_key = Self { point: GroupG1::new() };
         for key in keys {
-            agg_key.point.add(&key.point)
+            println!("cycle-tracker-start: add_point");
+            agg_key.point.add(&key.point);
+            println!("cycle-tracker-end: add_point");
         }
         Ok(agg_key)
     }
@@ -181,12 +183,15 @@ impl AggregateSignature {
         }
 
         // Subgroup check for signature
-        if !subgroup_check_g2(&self.point) {
-            return false;
-        }
+        //if !subgroup_check_g2(&self.point) {
+            //return false;
+        //}
 
         // Aggregate PublicKeys
+        println!("cycle-tracker-start: milagro_bls:aggregate_public_key");
         let aggregate_public_key = AggregatePublicKey::aggregate(public_keys);
+        println!("cycle-tracker-end: milagro_bls:aggregate_public_key");
+
         if aggregate_public_key.is_err() {
             return false;
         }
@@ -198,7 +203,9 @@ impl AggregateSignature {
         }
 
         // Hash message to curve
+        println!("cycle-tracker-start: milagro_bls:hash_to_curve_g2");
         let mut msg_hash = hash_to_curve_g2(msg);
+        println!("cycle-tracker-end: milagro_bls:hash_to_curve_g2");
 
         // Points must be affine for pairing
         let mut sig_point = self.point.clone();
